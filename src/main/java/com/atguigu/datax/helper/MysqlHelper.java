@@ -1,93 +1,67 @@
 package com.atguigu.datax.helper;
 
+import cn.hutool.db.Db;
+import cn.hutool.db.Entity;
+import cn.hutool.db.ds.DSFactory;
+import cn.hutool.setting.Setting;
 import com.atguigu.datax.beans.Table;
+import com.atguigu.datax.configuration.Configuration;
+import com.mysql.cj.jdbc.MysqlDataSource;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MysqlHelper {
-    private final ConfigHelper config;
     private final List<Table> tables;
-
-
-    public String getDatabase() {
-        return config.MYSQL_DATABASE;
-    }
 
     public List<Table> getTables() {
         return tables;
     }
 
     public MysqlHelper() {
-        config = new ConfigHelper();
         tables = new ArrayList<>();
 
-        // 获取表格
-        Connection connection = getConnection();
-        try {
-            if (config.MYSQL_TABLES != null) {
-                String[] tableNames = config.MYSQL_TABLES.split(",");
-                PreparedStatement preparedStatement = connection.prepareStatement("select table_id from information_schema.INNODB_TABLES where name=?");
-                for (String tableName : tableNames) {
-                    preparedStatement.setString(1, config.MYSQL_DATABASE + "/" + tableName);
-                    ResultSet resultSet = preparedStatement.executeQuery();
-                    resultSet.next();
-                    long tableId = resultSet.getLong(1);
-                    Table table = new Table(tableId, tableName);
-                    tables.add(table);
-                }
-                preparedStatement.close();
-            } else {
-                PreparedStatement preparedStatement = connection.prepareStatement("select table_id, name from information_schema.INNODB_TABLES where name like ?");
-                preparedStatement.setString(1, config.MYSQL_DATABASE + "%");
-                ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) {
-                    long tableId = resultSet.getLong(1);
-                    String tableName = resultSet.getString(2).split("/")[1];
-                    Table table = new Table(tableId, tableName);
-                    tables.add(table);
-                }
-                preparedStatement.close();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        Db db = Db.use(DSFactory.create(
+                Setting.create()
+                        .set("url", Configuration.MYSQL_URL)
+                        .set("user", Configuration.MYSQL_USER)
+                        .set("pass", Configuration.MYSQL_PASSWORD)
+                        .set("showSql", "false")
+                        .set("showParams", "false")
+                        .set("sqlLevel", "info")
+        ).getDataSource());
 
-        // 获取table的列
-        for (Table table : tables) {
+        // 获取设置的表格，如未设置，查询数据库下面所有表格
+        if (Configuration.MYSQL_TABLES.length != 0) {
+            for (String mysqlTable : Configuration.MYSQL_TABLES) {
+                tables.add(new Table(mysqlTable));
+            }
+        } else {
             try {
-                PreparedStatement preparedStatement = connection.prepareStatement("select name, mtype from information_schema.INNODB_COLUMNS where TABLE_ID = ? order by POS");
-                preparedStatement.setLong(1, table.id());
-                ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) {
-                    String name = resultSet.getString(1);
-                    int type = resultSet.getInt(2);
-                    table.addColumn(name, type);
-                }
-                preparedStatement.close();
+                db.findAll(Entity.create("information_schema.TABLES")
+                                .set("TABLE_SCHEMA", Configuration.MYSQL_DATABASE))
+                        .forEach(entity ->
+                                tables.add(new Table(entity.getStr("TABLE_NAME"))));
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+
+        // 获取所有表格的列
+        for (Table table : tables) {
+            try {
+                db.findAll(Entity.create("information_schema.COLUMNS")
+                        .set("TABLE_SCHEMA", Configuration.MYSQL_DATABASE)
+                        .set("TABLE_NAME", table.name())
+                ).forEach(entity -> table.addColumn(
+                        entity.getStr("COLUMN_NAME"),
+                        entity.getStr("DATA_TYPE")
+                ));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
-
-
     }
-
-    private Connection getConnection() {
-        try {
-            return DriverManager.getConnection(String.format("jdbc:mysql://%s:%s/%s?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf-8", config.MYSQL_HOST, config.MYSQL_PORT, config.MYSQL_DATABASE), config.MYSQL_USER, config.MYSQL_PASSWORD);
-        } catch (SQLException e) {
-            System.out.println("建立MySQL连接发生错误，请检查host/port/username/password配置");
-            throw new RuntimeException(e);
-        }
-    }
-
-
 }
