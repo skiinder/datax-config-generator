@@ -1,13 +1,10 @@
 package com.atguigu.datax.helper;
 
 
-import cn.hutool.core.bean.BeanPath;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.atguigu.datax.beans.Table;
 import com.atguigu.datax.configuration.Configuration;
-
-import java.util.*;
 
 public class DataxJsonHelper {
 

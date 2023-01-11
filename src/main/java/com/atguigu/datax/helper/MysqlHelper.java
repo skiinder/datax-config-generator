@@ -6,7 +6,6 @@ import cn.hutool.db.ds.DSFactory;
 import cn.hutool.setting.Setting;
 import com.atguigu.datax.beans.Table;
 import com.atguigu.datax.configuration.Configuration;
-import com.mysql.cj.jdbc.MysqlDataSource;
 
 import java.sql.*;
 import java.util.ArrayList;
