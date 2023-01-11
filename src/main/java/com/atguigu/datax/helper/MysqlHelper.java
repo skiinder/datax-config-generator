@@ -32,8 +32,8 @@ public class MysqlHelper {
         ).getDataSource());
 
         // 获取设置的表格，如未设置，查询数据库下面所有表格
-        if (Configuration.MYSQL_TABLES.length != 0) {
-            for (String mysqlTable : Configuration.MYSQL_TABLES) {
+        if (Configuration.MYSQL_TABLES != null && !"".equals(Configuration.MYSQL_TABLES)) {
+            for (String mysqlTable : Configuration.MYSQL_TABLES.split(",")) {
                 tables.add(new Table(mysqlTable));
             }
         } else {
