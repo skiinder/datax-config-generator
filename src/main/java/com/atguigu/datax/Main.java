@@ -16,18 +16,28 @@ public class Main {
         MysqlHelper mysqlHelper = new MysqlHelper();
         DataxJsonHelper dataxJsonHelper = new DataxJsonHelper();
 
-        for (Table table : mysqlHelper.getTables()) {
-            // 设置表信息
-            dataxJsonHelper.setTableAndColumns(table);
-            // 输出最终Json配置
-            Files.createDirectories(Paths.get(Configuration.OUT_DIR + "/input"));
-            Files.createDirectories(Paths.get(Configuration.OUT_DIR + "/output"));
-            FileWriter inputWriter = new FileWriter(Configuration.OUT_DIR + "/input/" + table.name() + ".json");
-            JSONUtil.toJsonStr(dataxJsonHelper.getInputConfig(), inputWriter);
-            inputWriter.close();
-            FileWriter outputWriter = new FileWriter(Configuration.OUT_DIR + "/output/" + table.name() + ".json");
-            JSONUtil.toJsonStr(dataxJsonHelper.getOutputConfig(), outputWriter);
-            outputWriter.close();
+        // 创建父文件夹
+        if (Configuration.IMPORT_OUT_DIR != null) {
+            Files.createDirectories(Paths.get(Configuration.IMPORT_OUT_DIR));
+            for (Table table : mysqlHelper.getTables()) {
+                // 设置表信息
+                dataxJsonHelper.setTableAndColumns(table);
+                // 输出最终Json配置
+                FileWriter inputWriter = new FileWriter(Configuration.IMPORT_OUT_DIR + "/" + Configuration.MYSQL_DATABASE + "." + table.name() + ".json");
+                JSONUtil.toJsonStr(dataxJsonHelper.getInputConfig(), inputWriter);
+                inputWriter.close();
+            }
+        }
+        if (Configuration.EXPORT_OUT_DIR != null) {
+            Files.createDirectories(Paths.get(Configuration.EXPORT_OUT_DIR));
+            for (Table table : mysqlHelper.getTables()) {
+                // 设置表信息
+                dataxJsonHelper.setTableAndColumns(table);
+                // 输出最终Json配置
+                FileWriter outputWriter = new FileWriter(Configuration.EXPORT_OUT_DIR + "/" + Configuration.MYSQL_DATABASE + "." + table.name() + ".json");
+                JSONUtil.toJsonStr(dataxJsonHelper.getOutputConfig(), outputWriter);
+                outputWriter.close();
+            }
         }
 
     }

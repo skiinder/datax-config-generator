@@ -15,7 +15,8 @@ public class Configuration {
     public static String MYSQL_URL;
     public static String MYSQL_TABLES;
     public static String HDFS_URI;
-    public static String OUT_DIR;
+    public static String IMPORT_OUT_DIR;
+    public static String EXPORT_OUT_DIR;
 
     static {
         Path path = Paths.get("configuration.properties");
@@ -30,7 +31,8 @@ public class Configuration {
             MYSQL_URL = "jdbc:mysql://" + MYSQL_HOST + ":" + MYSQL_PORT + "/" + MYSQL_DATABASE + "?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf-8";
             MYSQL_TABLES = configuration.getProperty("mysql.tables", "");
             HDFS_URI = configuration.getProperty("hdfs.uri", "hdfs://hadoop102:8020");
-            OUT_DIR = configuration.getProperty("outdir", "d:/output");
+            IMPORT_OUT_DIR = configuration.getProperty("import_outdir");
+            EXPORT_OUT_DIR = configuration.getProperty("export_outdir");
         } catch (IOException e) {
             MYSQL_USER = "root";
             MYSQL_PASSWORD = "000000";
@@ -40,7 +42,8 @@ public class Configuration {
             MYSQL_URL = "jdbc:mysql://" + MYSQL_HOST + ":" + MYSQL_PORT + "/" + MYSQL_DATABASE + "?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf-8";
             MYSQL_TABLES = "";
             HDFS_URI = "hdfs://hadoop102:8020";
-            OUT_DIR = "d:/output";
+            IMPORT_OUT_DIR = null;
+            EXPORT_OUT_DIR = null;
         }
     }
 }

@@ -9,8 +9,8 @@ import com.atguigu.datax.configuration.Configuration;
 public class DataxJsonHelper {
 
     // 解析inputConfig和outputConfig模板
-    private final JSONObject inputConfig = JSONUtil.parseObj("{\"job\":{\"content\":[{\"reader\":{\"name\":\"mysqlreader\",\"parameter\":{\"column\":[],\"connection\":[{\"jdbcUrl\":\"\",\"table\":\"\"}],\"password\":\"\",\"splitPk\":\"\",\"username\":\"\"}},\"writer\":{\"name\":\"hdfswriter\",\"parameter\":{\"column\":[],\"compress\":\"gzip\",\"defaultFS\":\"\",\"fieldDelimiter\":\"\\t\",\"fileName\":\"content\",\"fileType\":\"text\",\"path\":\"${targetdir}\",\"writeMode\":\"append\",\"nullFormat\":\"\"}}}],\"setting\":{\"speed\":{\"channel\":1}}}}");
-    private final JSONObject outputConfig = JSONUtil.parseObj("{\"job\":{\"setting\":{\"speed\":{\"channel\":1}},\"content\":[{\"reader\":{\"name\":\"hdfsreader\",\"parameter\":{\"path\":\"${exportdir}\",\"defaultFS\":\"\",\"column\":[\"*\"],\"fileType\":\"text\",\"encoding\":\"UTF-8\",\"fieldDelimiter\":\"\\t\",\"nullFormat\":\"\\\\N\"}},\"writer\":{\"name\":\"mysqlwriter\",\"parameter\":{\"writeMode\":\"replace\",\"username\":\"\",\"password\":\"\",\"column\":[],\"connection\":[{\"jdbcUrl\":\"\",\"table\":\"\"}]}}}]}}");
+    private final JSONObject inputConfig = JSONUtil.parseObj("{\"job\":{\"content\":[{\"reader\":{\"name\":\"mysqlreader\",\"parameter\":{\"column\":[],\"connection\":[{\"jdbcUrl\":[],\"table\":[]}],\"password\":\"\",\"splitPk\":\"\",\"username\":\"\"}},\"writer\":{\"name\":\"hdfswriter\",\"parameter\":{\"column\":[],\"compress\":\"gzip\",\"defaultFS\":\"\",\"fieldDelimiter\":\"\\t\",\"fileName\":\"content\",\"fileType\":\"text\",\"path\":\"${targetdir}\",\"writeMode\":\"append\",\"nullFormat\":\"\"}}}],\"setting\":{\"speed\":{\"channel\":1}}}}");
+    private final JSONObject outputConfig = JSONUtil.parseObj("{\"job\":{\"setting\":{\"speed\":{\"channel\":1}},\"content\":[{\"reader\":{\"name\":\"hdfsreader\",\"parameter\":{\"path\":\"${exportdir}\",\"defaultFS\":\"\",\"column\":[\"*\"],\"fileType\":\"text\",\"encoding\":\"UTF-8\",\"fieldDelimiter\":\"\\t\",\"nullFormat\":\"\\\\N\"}},\"writer\":{\"name\":\"mysqlwriter\",\"parameter\":{\"writeMode\":\"replace\",\"username\":\"\",\"password\":\"\",\"column\":[],\"connection\":[{\"jdbcUrl\":[],\"table\":[]}]}}}]}}");
 
     public DataxJsonHelper() {
         // 获取Reader和Writer配置
@@ -32,8 +32,8 @@ public class DataxJsonHelper {
         mysqlWriterPara.set("password", Configuration.MYSQL_PASSWORD);
 
         // 设置JDBC URL
-        mysqlReaderPara.putByPath("connection[0].jdbcUrl", Configuration.MYSQL_URL);
-        mysqlWriterPara.putByPath("connection[0].jdbcUrl", Configuration.MYSQL_URL);
+        mysqlReaderPara.putByPath("connection[0].jdbcUrl[0]", Configuration.MYSQL_URL);
+        mysqlWriterPara.putByPath("connection[0].jdbcUrl[0]", Configuration.MYSQL_URL);
 
         // 写回Reader和Writer配置
         inputConfig.putByPath("job.content[0].reader.parameter", mysqlReaderPara);
@@ -44,8 +44,8 @@ public class DataxJsonHelper {
 
     public void setTableAndColumns(Table table) {
         // 设置表名
-        inputConfig.putByPath("job.content[0].reader.parameter.connection[0].table", table.name());
-        outputConfig.putByPath("job.content[0].writer.parameter.connection[0].table", table.name());
+        inputConfig.putByPath("job.content[0].reader.parameter.connection[0].table[0]", table.name());
+        outputConfig.putByPath("job.content[0].writer.parameter.connection[0].table[0]", table.name());
 
         // 设置列名
         inputConfig.putByPath("job.content[0].reader.parameter.column", table.getColumnNames());
