@@ -1,6 +1,9 @@
 package com.atguigu.datax.beans;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Table {
@@ -25,7 +28,7 @@ public class Table {
         return columns.stream().map(Column::name).collect(Collectors.toList());
     }
 
-    public List<Map<String, String>> getColumns() {
+    public List<Map<String, String>> getColumnNamesAndTypes() {
         List<Map<String, String>> result = new ArrayList<>();
         columns.forEach(column -> {
             Map<String, String> temp = new HashMap<>();
